@@ -1,12 +1,17 @@
 options(scipen=999)
 library(ggplot2)
-dataBase <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/newDB.csv")
 
-accidentsDB <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/accidentDB complete.csv")
+source("dataFunctions.R")
+source("dataPaths.R")
 
-exchangeRateIsraelBank <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/exchange rate israel bank.csv")
 
-NYSE <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/NYSE.csv")
+dataBase <- read.csv(path_main_db)
+
+accidentsDB <- read.csv(path_accidents_db)
+
+exchangeRateIsraelBank <- read.csv(path_exchange_rates)
+
+NYSE <- read.csv(path_NYSE)
 
 
 dataBase$ID_DEBUG <- 0
@@ -21,22 +26,6 @@ id <- 1
 for (x in dataBase$ID_DEBUG) {
   dataBase$ID_DEBUG[id] <- id
   id <- id+1
-}
-add_days_to_date <- function(date_string, days_to_add){
-  date <- as.Date(date_string, format="%d/%m/%Y")
-  new_date <- date + days_to_add
-  return (format(new_date, "%d/%m/%Y"))
-}
-
-check_in_time_range<- function(time_string){
-  time_parts <- strsplit(time_string, ":")[[1]]
-  minuts <- as.integer(time_parts[2])
-  hours <- as.integer(time_parts[1])
-  if(hours < 16 || (hours==16 && minuts <= 50)){
-    return(TRUE)
-  }else{
-    return(FALSE)
-  }
 }
 
 id<-0
