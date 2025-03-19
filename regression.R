@@ -6,29 +6,31 @@ source("plots.R")
 
 
 dataBase <- read.csv(path_main_db)
-
 accidentsDB <- read.csv(path_accidents_db)
-
 exchangeRateIsraelBank <- read.csv(path_exchange_rates)
 
 NYSE <- read.csv(path_NYSE)
+NYSE <- NYSEadd_revenue(NYSE)
 
-
-dataBase$ID_DEBUG <- 0
 dataBase$NYSE <- 0
 dataBase$exchangeRate <- 0
+
 dataBase$DayOfAccident <- 0
 dataBase$firstDayAfterAccident <- 0
 dataBase$secondDayAfterAccident <- 0
 dataBase$thirdDayAfterAccident <- 0
 
-id <- 1
-for (x in dataBase$ID_DEBUG) {
-  dataBase$ID_DEBUG[id] <- id
-  id <- id+1
+accidentsDB <- fixTradingDates(accidentsDB)
+
+
+for (date in NYSE$Date) { # note: assuming no need to fix dates for NYSE trading
+  if(date %in% dataBase$Date){
+    indexNYSE <- which(NYSE$Date == date)
+    index <- which(dataBase$Date == date)
+    dataBase$NYSE[index] <- NYSE$revenue[indexNYSE]
+  }
 }
 
-id<-0
 for (date in accidentsDB$Israel.Date) {
   # check for the need to skip a date because of market working hours
   index_accident <- which(accidentsDB$Israel.Date == date)
@@ -58,9 +60,8 @@ for (date in accidentsDB$Israel.Date) {
     index <- which(dataBase$Date == day3)
     dataBase$thirdDayAfterAccident[index] = 1
   }
-  id <- id+1
+  
 }
-
 
 # set all categorical data types...
 dataBase$DOW <- as.factor(dataBase$DOW)
@@ -76,6 +77,17 @@ day_accident <- mean(dataBase[dataBase$DayOfAccident == 1, 'revenue'])
 first_day_after_accident <- mean(dataBase[dataBase$firstDayAfterAccident == 1, 'revenue'])
 sec_day_after_accident <- mean(dataBase[dataBase$secondDayAfterAccident == 1, 'revenue'], na.rm = TRUE)
 third_day_after_accident <- mean(dataBase[dataBase$thirdDayAfterAccident == 1, 'revenue'])
+
+# calculate mean return on every day vs days after accident
+simple_avgNYSE <- mean(dataBase$NYSE, na.rm = TRUE)
+day_accidentNYSE <- mean(dataBase[dataBase$DayOfAccident == 1, 'NYSE'])
+first_day_after_accidentNYSE <- mean(dataBase[dataBase$firstDayAfterAccident == 1, 'NYSE'])
+sec_day_after_accidentNYSE <- mean(dataBase[dataBase$secondDayAfterAccident == 1, 'NYSE'], na.rm = TRUE)
+third_day_after_accidentNYSE <- mean(dataBase[dataBase$thirdDayAfterAccident == 1, 'NYSE'])
+
+
+
+
 
 first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
 sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
@@ -114,16 +126,16 @@ geom_histogramPlot(dataBase)
 #CAR
 car_days <- c(-5:13)*0
 index <- 1
-for (value in dataBase$super) {
-  if(value==-1){
-    car <- 0
+for (date in accidentsDB$Israel.Date) { # todo: change logic for new columns!
+    current_car <- 0
     for (i in c(-5:13)) {
-        car <- car + (dataBase$revenue[index+i] - simple_avg)
-        car_days[i+6] <- car
+        current_car <- current_car + (get_revenue_at_date(dataBase,add_days_to_date(date,i)) - simple_avg)
+        car_days[i+6] <- current_car
     }
+    index <- index + 1
   }
-  index <- index + 1
-}
+ 
+
 
 # plot CAR results
 x_name <- "x"
