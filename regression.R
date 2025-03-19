@@ -1,0 +1,172 @@
+options(scipen=999)
+library(ggplot2)
+dataBase <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/newDB.csv")
+
+accidentsDB <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/accidentDB complete.csv")
+
+exchangeRateIsraelBank <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/exchange rate israel bank.csv")
+
+NYSE <- read.csv("C:/Users/Baruc/Desktop/MBA/סמינריון מימון/aviation disaster/analysis/NYSE.csv")
+
+
+dataBase$ID_DEBUG <- 0
+dataBase$NYSE <- 0
+dataBase$exchangeRate <- 0
+dataBase$DayOfAccident <- 0
+dataBase$firstDayAfterAccident <- 0
+dataBase$secondDayAfterAccident <- 0
+dataBase$thirdDayAfterAccident <- 0
+
+id <- 1
+for (x in dataBase$ID_DEBUG) {
+  dataBase$ID_DEBUG[id] <- id
+  id <- id+1
+}
+add_days_to_date <- function(date_string, days_to_add){
+  date <- as.Date(date_string, format="%d/%m/%Y")
+  new_date <- date + days_to_add
+  return (format(new_date, "%d/%m/%Y"))
+}
+
+check_in_time_range<- function(time_string){
+  time_parts <- strsplit(time_string, ":")[[1]]
+  minuts <- as.integer(time_parts[2])
+  hours <- as.integer(time_parts[1])
+  if(hours < 16 || (hours==16 && minuts <= 50)){
+    return(TRUE)
+  }else{
+    return(FALSE)
+  }
+}
+
+id<-0
+for (date in accidentsDB$Israel.Date) {
+  # check for the need to skip a date because of market working hours
+  index_accident <- which(accidentsDB$Israel.Date == date)
+  hour <- accidentsDB$Israel.Time[index_accident]
+  if(check_in_time_range(hour)==FALSE){
+    new_date <- add_days_to_date(date, 1)
+  }else{
+    new_date <- date
+  }
+  # test this function - day of accident marked bad...
+  if(new_date %in% dataBase$Date){
+    index <- which(dataBase$Date == new_date)
+    dataBase$DayOfAccident[index] = 1
+  }
+  day1 <- add_days_to_date(new_date,1)
+  day2 <- add_days_to_date(new_date,2)
+  day3 <- add_days_to_date(new_date,3)
+  if(day1 %in% dataBase$Date){
+    index <- which(dataBase$Date == day1)
+    dataBase$firstDayAfterAccident[index] = 1
+  }
+  if(day2 %in% dataBase$Date){
+    index <- which(dataBase$Date == day2)
+    dataBase$secondDayAfterAccident[index] = 1
+  }
+  if(day3 %in% dataBase$Date){
+    index <- which(dataBase$Date == day3)
+    dataBase$thirdDayAfterAccident[index] = 1
+  }
+  id <- id+1
+}
+
+
+# set all categorical data types...
+dataBase$DOW <- as.factor(dataBase$DOW)
+
+dataBase$TAX <- as.factor(dataBase$TAX)
+dataBase$after_holiday <- as.factor(dataBase$after_holiday)
+
+
+
+# calculate mean return on every day vs days after accident
+simple_avg <- mean(dataBase$revenue, na.rm = TRUE)
+day_accident <- mean(dataBase[dataBase$DayOfAccident == 1, 'revenue'])
+first_day_after_accident <- mean(dataBase[dataBase$firstDayAfterAccident == 1, 'revenue'])
+sec_day_after_accident <- mean(dataBase[dataBase$secondDayAfterAccident == 1, 'revenue'], na.rm = TRUE)
+third_day_after_accident <- mean(dataBase[dataBase$thirdDayAfterAccident == 1, 'revenue'])
+
+first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
+sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
+third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
+
+dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
+dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
+dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
+dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
+dataBase$super <- -1
+
+id <- 1
+for (x in dataBase$ID_DEBUG) {
+  if(dataBase$DayOfAccident[id]==1){
+    dataBase$super[id] <- 0
+  }
+  if(dataBase$firstDayAfterAccident[id]==1){
+    dataBase$super[id] <- 1
+  }
+  if(dataBase$secondDayAfterAccident[id]==1){
+    dataBase$super[id] <- 2
+  }
+  if(dataBase$thirdDayAfterAccident[id]==1){
+    dataBase$super[id] <- 3
+  }
+  id <- id+1
+}
+
+dataBase$super <- as.factor(dataBase$super)
+#Plot
+midBase <- dataBase[ which(dataBase$super == 1 | dataBase$super == 3) , ]
+# check return by date after crash
+ggplot(midBase, aes(x = revenue, fill=super)) + geom_histogram(bins = 10,position = "dodge", alpha = 0.7)
+# check by different graph...
+ggplot(midBase, aes(x=revenue)) + stat_ecdf(aes(color = super,linetype = super), 
+              geom = "step", size = 1.5) +
+  scale_color_manual(values = c("#00AFBB", "#E7B800"))+
+  labs(y = "Cumulative probability")
+
+#CAR
+car_days <- c(-5:13)*0
+index <- 1
+for (value in dataBase$super) {
+  if(value==-1){
+    car <- 0
+    for (i in c(-5:13)) {
+        car <- car + (dataBase$revenue[index+i] - simple_avg)
+        car_days[i+6] <- car
+    }
+  }
+  index <- index + 1
+}
+
+# plot CAR results
+x_name <- "x"
+y_name <- "y"
+days  <- c(-5:13)
+df <- data.frame(days,car_days)
+names(df) <- c(x_name,y_name)
+
+ggplot(df, aes(x = x, y = y)) + geom_line()+
+  labs(x="Days relative to disaster date (t = 0)" , y = "Cumulative abnormal rate of return")
+
+
+set.seed(1)
+# Split data to training and validation
+idx <- sample(seq(1, 2), size = nrow(dataBase), replace = TRUE, prob = c(.4, .6))
+validation <- dataBase[idx == 1,]
+training <- dataBase[idx == 2,]
+
+# 4.2 build reg object
+reg <- lm(revenue ~ super + DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+TAX+after_holiday, data = training[, ]) 
+#reg <- lm(revenue ~ afterAccidentDays, data = training[, ]) 
+
+summary(reg)
+# 4.3 test reg on training Vs. validation
+library(forecast)
+pred <- predict(reg, newdata = training)
+accuracy(pred, training$revenue)
+
+pred_validation <- predict(reg, newdata = validation)
+accuracy(pred, validation$revenue)
+
