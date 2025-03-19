@@ -1,8 +1,8 @@
 options(scipen=999)
-library(ggplot2)
 
 source("dataFunctions.R")
 source("dataPaths.R")
+source("plots.R")
 
 
 dataBase <- read.csv(path_main_db)
@@ -105,15 +105,11 @@ for (x in dataBase$ID_DEBUG) {
 }
 
 dataBase$super <- as.factor(dataBase$super)
+
+
 #Plot
-midBase <- dataBase[ which(dataBase$super == 1 | dataBase$super == 3) , ]
-# check return by date after crash
-ggplot(midBase, aes(x = revenue, fill=super)) + geom_histogram(bins = 10,position = "dodge", alpha = 0.7)
-# check by different graph...
-ggplot(midBase, aes(x=revenue)) + stat_ecdf(aes(color = super,linetype = super), 
-              geom = "step", size = 1.5) +
-  scale_color_manual(values = c("#00AFBB", "#E7B800"))+
-  labs(y = "Cumulative probability")
+stat_ecdfPlot(data = dataBase)
+geom_histogramPlot(dataBase)
 
 #CAR
 car_days <- c(-5:13)*0
