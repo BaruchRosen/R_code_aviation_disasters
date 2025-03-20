@@ -45,5 +45,9 @@ NYSEadd_revenue <- function(NYSE_DB){
 
 get_revenue_at_date <- function(dataBase, date){
   # todo: fix function
-  return (5)
+  if(date %in% dataBase$Date){
+    index <- which(dataBase$Date == date)
+    return(dataBase$revenue[index])
+  }
+  return (0)
 }

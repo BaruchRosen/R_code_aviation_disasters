@@ -93,14 +93,11 @@ first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = d
 sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
 third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
 
-dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
-dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
-dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
-dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
+
 dataBase$super <- -1
 
 id <- 1
-for (x in dataBase$ID_DEBUG) {
+for (x in dataBase$DayOfAccident) {
   if(dataBase$DayOfAccident[id]==1){
     dataBase$super[id] <- 0
   }
@@ -116,6 +113,11 @@ for (x in dataBase$ID_DEBUG) {
   id <- id+1
 }
 
+dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
+dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
+dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
+dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
+
 dataBase$super <- as.factor(dataBase$super)
 
 
@@ -125,15 +127,15 @@ geom_histogramPlot(dataBase)
 
 #CAR
 car_days <- c(-5:13)*0
-index <- 1
-for (date in accidentsDB$Israel.Date) { # todo: change logic for new columns!
+
+for (date in accidentsDB$correctDate) {
     current_car <- 0
     for (i in c(-5:13)) {
         current_car <- current_car + (get_revenue_at_date(dataBase,add_days_to_date(date,i)) - simple_avg)
-        car_days[i+6] <- current_car
+        car_days[i+6] <- car_days[i+6] + current_car
     }
-    index <- index + 1
-  }
+
+}
  
 
 
