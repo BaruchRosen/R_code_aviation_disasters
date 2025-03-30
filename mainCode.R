@@ -20,7 +20,7 @@ dataBase$firstDayAfterAccident <- 0
 dataBase$secondDayAfterAccident <- 0
 dataBase$thirdDayAfterAccident <- 0
 
-accidentsDB <- fixTradingDates(accidentsDB)
+# accidentsDB <- fixTradingDates(accidentsDB)  #should already be fixed by Efrat!
 
 
 for (date in NYSE$Date) { # note: assuming no need to fix dates for NYSE trading
@@ -30,38 +30,38 @@ for (date in NYSE$Date) { # note: assuming no need to fix dates for NYSE trading
     dataBase$NYSE[index] <- NYSE$revenue[indexNYSE]
   }
 }
-
-for (date in accidentsDB$Israel.Date) {
-  # check for the need to skip a date because of market working hours
-  index_accident <- which(accidentsDB$Israel.Date == date)
-  hour <- accidentsDB$Israel.Time[index_accident]
-  if(check_in_time_range(hour)==FALSE){
-    new_date <- add_days_to_date(date, 1)
-  }else{
-    new_date <- date
-  }
-  # test this function - day of accident marked bad...
-  if(new_date %in% dataBase$Date){
-    index <- which(dataBase$Date == new_date)
-    dataBase$DayOfAccident[index] = 1
-  }
-  day1 <- add_days_to_date(new_date,1)
-  day2 <- add_days_to_date(new_date,2)
-  day3 <- add_days_to_date(new_date,3)
-  if(day1 %in% dataBase$Date){
-    index <- which(dataBase$Date == day1)
-    dataBase$firstDayAfterAccident[index] = 1
-  }
-  if(day2 %in% dataBase$Date){
-    index <- which(dataBase$Date == day2)
-    dataBase$secondDayAfterAccident[index] = 1
-  }
-  if(day3 %in% dataBase$Date){
-    index <- which(dataBase$Date == day3)
-    dataBase$thirdDayAfterAccident[index] = 1
-  }
-  
-}
+# not needed after fix all data in super!
+# for (date in accidentsDB$Israel.Date) {
+#   # check for the need to skip a date because of market working hours
+#   index_accident <- which(accidentsDB$Israel.Date == date)
+#   hour <- accidentsDB$Israel.Time[index_accident]
+#   if(check_in_time_range(hour)==FALSE){
+#     new_date <- add_days_to_date(date, 1)
+#   }else{
+#     new_date <- date
+#   }
+#   # test this function - day of accident marked bad...
+#   if(new_date %in% dataBase$Date){
+#     index <- which(dataBase$Date == new_date)
+#     dataBase$DayOfAccident[index] = 1
+#   }
+#   day1 <- add_days_to_date(new_date,1)
+#   day2 <- add_days_to_date(new_date,2)
+#   day3 <- add_days_to_date(new_date,3)
+#   if(day1 %in% dataBase$Date){
+#     index <- which(dataBase$Date == day1)
+#     dataBase$firstDayAfterAccident[index] = 1
+#   }
+#   if(day2 %in% dataBase$Date){
+#     index <- which(dataBase$Date == day2)
+#     dataBase$secondDayAfterAccident[index] = 1
+#   }
+#   if(day3 %in% dataBase$Date){
+#     index <- which(dataBase$Date == day3)
+#     dataBase$thirdDayAfterAccident[index] = 1
+#   }
+# 
+# }
 
 # set all categorical data types...
 dataBase$DOW <- as.factor(dataBase$DOW)
@@ -73,17 +73,17 @@ dataBase$after_holiday <- as.factor(dataBase$after_holiday)
 
 # calculate mean return on every day vs days after accident
 simple_avg <- mean(dataBase$revenue, na.rm = TRUE)
-day_accident <- mean(dataBase[dataBase$DayOfAccident == 1, 'revenue'])
-first_day_after_accident <- mean(dataBase[dataBase$firstDayAfterAccident == 1, 'revenue'])
-sec_day_after_accident <- mean(dataBase[dataBase$secondDayAfterAccident == 1, 'revenue'], na.rm = TRUE)
-third_day_after_accident <- mean(dataBase[dataBase$thirdDayAfterAccident == 1, 'revenue'])
+day_accident <- mean(dataBase[dataBase$super == -1, 'revenue'])
+first_day_after_accident <- mean(dataBase[dataBase$super == 1, 'revenue'])
+sec_day_after_accident <- mean(dataBase[dataBase$super == 2, 'revenue'], na.rm = TRUE)
+third_day_after_accident <- mean(dataBase[dataBase$super == 3, 'revenue'])
 
 # calculate mean return on every day vs days after accident
 simple_avgNYSE <- mean(dataBase$NYSE, na.rm = TRUE)
-day_accidentNYSE <- mean(dataBase[dataBase$DayOfAccident == 1, 'NYSE'])
-first_day_after_accidentNYSE <- mean(dataBase[dataBase$firstDayAfterAccident == 1, 'NYSE'])
-sec_day_after_accidentNYSE <- mean(dataBase[dataBase$secondDayAfterAccident == 1, 'NYSE'], na.rm = TRUE)
-third_day_after_accidentNYSE <- mean(dataBase[dataBase$thirdDayAfterAccident == 1, 'NYSE'])
+day_accidentNYSE <- mean(dataBase[dataBase$super == -1, 'NYSE'])
+first_day_after_accidentNYSE <- mean(dataBase[dataBase$super == 1, 'NYSE'])
+sec_day_after_accidentNYSE <- mean(dataBase[dataBase$super == 2, 'NYSE'], na.rm = TRUE)
+third_day_after_accidentNYSE <- mean(dataBase[dataBase$super == 3, 'NYSE'])
 
 
 
