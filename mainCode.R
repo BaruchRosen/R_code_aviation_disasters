@@ -134,7 +134,7 @@ for (date in accidentsDB$correctDate) {
         current_car <- current_car + (get_revenue_at_date(dataBase,add_days_to_date(date,i)) - simple_avg)
         car_days[i+6] <- car_days[i+6] + current_car
     }
-
+  print(car_days)
 }
  
 
