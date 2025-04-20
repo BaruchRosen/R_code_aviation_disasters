@@ -136,7 +136,6 @@ with open('accidentDB 1980 - 2024.csv') as file_obj:
     for row in reader_obj:
         newString = rowString2finalString(row)
         timeData.append(newString)
-# print(timeData)
 
 
 with open('accidentDB IsraelTime.csv', 'w') as f:

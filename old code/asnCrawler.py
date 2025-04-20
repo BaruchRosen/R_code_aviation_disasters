@@ -16,10 +16,6 @@ def get_pages_per_year(year_url, headers):
     soup = BeautifulSoup(req.content, "html.parser")
     pagenumbers = soup.find_all("div", {"class": "pagenumbers"})
     links_num = len(str(pagenumbers).split('<a '))
-
-    # links = pagenumbers.select('a')
-    # urls = [link['href'] for link in links]
-    # print(urls)
     return links_num
 
 def get_relevant_accidents_urls(full_url, headers, minimum_fat=50):
