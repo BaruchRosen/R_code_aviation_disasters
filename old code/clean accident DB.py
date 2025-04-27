@@ -1,6 +1,6 @@
 import csv 
 
-file = 'accidentDB 1980 - 2024.csv'
+file = 'accidentDB 1993 - 2024.csv'
 
 columnNames = ['Date', 'Time', 'Fatalities']
 newData = []

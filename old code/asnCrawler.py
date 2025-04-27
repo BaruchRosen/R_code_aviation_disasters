@@ -10,8 +10,8 @@ headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 
 
 def get_pages_per_year(year_url, headers):
-    time_delay = (random.randrange(0, 1))
-    time.sleep(time_delay)
+    # time_delay = (random.randrange(0, 1))
+    # time.sleep(time_delay)
     req = requests.get(year_url, headers=headers)
     soup = BeautifulSoup(req.content, "html.parser")
     pagenumbers = soup.find_all("div", {"class": "pagenumbers"})
@@ -19,8 +19,8 @@ def get_pages_per_year(year_url, headers):
     return links_num
 
 def get_relevant_accidents_urls(full_url, headers, minimum_fat=50):
-    time_delay = (random.randrange(1, 2))
-    time.sleep(time_delay)
+    # time_delay = (random.randrange(1, 2))
+    # time.sleep(time_delay)
     req = requests.get(full_url, headers=headers)
     soup = BeautifulSoup(req.content, "html.parser")
     tables = soup.find_all('table')
@@ -51,8 +51,8 @@ def get_relevant_accidents_urls(full_url, headers, minimum_fat=50):
     return url_list, dates_list
 
 def get_accident(full_url, headers):
-    time_delay = (random.randrange(0, 1))
-    time.sleep(time_delay)
+    # time_delay = (random.randrange(0, 1))
+    # time.sleep(time_delay)
     req = requests.get(full_url, headers=headers)
     soup = BeautifulSoup(req.content, "html.parser")
     tables = soup.find_all('table')
@@ -71,8 +71,7 @@ def get_accident(full_url, headers):
         full_accident_text_csv += row[1] + ','
     return full_accident_text_csv.replace('\n', ' ,')
 
-minyear = 1980
-# minyear = 2023
+minyear = 1993
 maxYear = 2025
 years = [*range(minyear,maxYear,1)]
 

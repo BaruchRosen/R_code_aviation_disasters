@@ -42,7 +42,8 @@ def convertTime(date_time, country, targetCountry = 'Asia/Jerusalem'):
     # "21/1/1993 16:00"
 
     # Parse the date string into a datetime object (day/month/year hour:minute format)
-    fmt = "%d %b %y %H:%M"
+    fmt = "%d %b %Y %H:%M"
+    # '%d %b %Y  %H:%M'
     dt = datetime.strptime(date_str, fmt)
 
     # Localize the datetime to the 'from_zone' time zone
@@ -131,7 +132,7 @@ def rowString2finalString(stringArray):
             print('error date:' + stringArray[0])
     return newString
 
-with open('accidentDB 1980 - 2024.csv') as file_obj: 
+with open('accidentDB 1993 - 2024.csv') as file_obj: 
     reader_obj = csv.reader(file_obj)
     for row in reader_obj:
         newString = rowString2finalString(row)
@@ -139,6 +140,7 @@ with open('accidentDB 1980 - 2024.csv') as file_obj:
 
 
 with open('accidentDB IsraelTime.csv', 'w') as f:
+    
     labelString = 'Date,Israel Time'
     f.write(f"{labelString}\n")
     for line in timeData:
