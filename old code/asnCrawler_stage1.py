@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 import random
 import time
+from datetime import datetime
 
 accident_strings = []
 
@@ -51,8 +52,6 @@ def get_relevant_accidents_urls(full_url, headers, minimum_fat=50):
     return url_list, dates_list
 
 def get_accident(full_url, headers):
-    # time_delay = (random.randrange(0, 1))
-    # time.sleep(time_delay)
     req = requests.get(full_url, headers=headers)
     soup = BeautifulSoup(req.content, "html.parser")
     tables = soup.find_all('table')
@@ -66,7 +65,8 @@ def get_accident(full_url, headers):
             rows.append([el.text.strip() for el in row.find_all('td')])
 
     full_accident_text_csv = ''
-    for row in rows:
+    for row in rows:  #
+        # row = ''
         full_accident_text_csv += row[0].split(':')[0] + ','
         full_accident_text_csv += row[1] + ','
     return full_accident_text_csv.replace('\n', ' ,')
@@ -89,9 +89,10 @@ for year in years:
         for i, accident in enumerate(accident_urls):
             accident_url = 'https://asn.flightsafety.org' + accident
             accident_string = get_accident(accident_url, headers)
-            date_string = accident_dates[i] + ' ,'
-            print(date_string)
-            accident_strings.append(date_string + accident_string)
+            date_obj = datetime.strptime(accident_dates[i], "%d %b %Y")
+            formatted_date = f"{date_obj.day}/{date_obj.month}/{date_obj.year}"
+            print(formatted_date)
+            accident_strings.append(formatted_date + ',' + accident_string)
 
 with open('accidentDB ' + str(minyear) + ' - '+ str(maxYear-1) + '.csv', 'w') as f:
     for line in accident_strings:
@@ -100,3 +101,4 @@ end_time = time.time()
 
 elapsed_time = end_time - start_time
 print("Elapsed time: ", elapsed_time) 
+# 436.3 seconds of running

@@ -3,21 +3,31 @@ import pytz
 import pandas as pd
 import csv
 import re
+import tkinter as tk
+from tkinter import filedialog
+
+
+def choose_file(message):
+    filepath = filedialog.askopenfilename(
+        title=message,
+        filetypes=[("All files", "*.*"), ("Text files", "*.txt")]
+    )
+    return filepath
 
 def IsraelTimeUTC(date_time, utcMIN, targetCountry = 'Asia/Jerusalem'):
     utc_offset = pytz.FixedOffset(utcMIN)  # UTC+3:00 is 180 minutes ahead
 
     # Specify the date and time you want to convert (e.g., "21/1/1993 16:00")
-    result = re.sub(r'[^a-zA-Z0-9\s:-]','', date_time)
+    result = re.sub(r'[^a-zA-Z0-9\s:/-]','', date_time)
     result = re.sub(r'[-]',' ', result)
     if 'LT' in result:
-        result = '09 Aug 24 13:22'
+        result = '9/8/2024 13:22'
         print('gotch!')
     date_str = result
     # "21/1/1993 16:00"
 
     # Parse the date string into a datetime object (day/month/year hour:minute format)
-    fmt = "%d %b %y %H:%M"
+    fmt = "%d/%m/%Y %H:%M"
     dt = datetime.strptime(date_str, fmt)
 
 
@@ -33,16 +43,16 @@ def convertTime(date_time, country, targetCountry = 'Asia/Jerusalem'):
     to_zone = pytz.timezone(targetCountry)
 
     # Specify the date and time you want to convert (e.g., "21/1/1993 16:00")
-    result = re.sub(r'[^a-zA-Z0-9\s:-]','', date_time)
+    result = re.sub(r'[^a-zA-Z0-9\s:/-]','', date_time)
     result = re.sub(r'[-]',' ', result)
     if 'LT' in result:
-        result = '09 Aug 24 13:22'
+        result = '9/8/2024 13:22'
         print('gotch!')
     date_str = result
     # "21/1/1993 16:00"
 
     # Parse the date string into a datetime object (day/month/year hour:minute format)
-    fmt = "%d %b %Y %H:%M"
+    fmt = '%d/%m/%Y %H:%M'
     # '%d %b %Y  %H:%M'
     dt = datetime.strptime(date_str, fmt)
 
@@ -56,8 +66,8 @@ def convertTime(date_time, country, targetCountry = 'Asia/Jerusalem'):
     print(f"Time in {from_zone.zone}: {localized_time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Time in {to_zone.zone}: {target_time.strftime('%Y-%m-%d %H:%M:%S')}")
     return target_time.strftime('%Y-%m-%d %H:%M:%S')
-
-TimeZonesData = pd.read_excel('countryTimeZones.xlsx')
+#ccant deal with hebrew path!
+TimeZonesData = pd.read_excel(choose_file('countryTimeZones.xlsx'))
 timeZoneNames = TimeZonesData['TimeZones'].tolist()
 
 def utcFromString(string): # find 
@@ -74,12 +84,51 @@ def utcFromString(string): # find
         return int(withoutHours)
     
 
-countries2UTC = pd.read_excel('countries_timeZones.xlsx')
+countries2UTC = pd.read_excel(choose_file('countries_timeZones.xlsx'))
 countries2UTCList = [countries2UTC.iloc[:,0].tolist(), [ utcFromString(ele) for ele in countries2UTC.iloc[:,1].tolist()]]
 # todo: read UTC per name and add option to find time with this table!
 
 # accidentFullDB = pd.read_csv('accidentDB 1980 - 2024.csv')
 timeData = []
+
+
+def convertTime_2(basicCountry, date, time):
+    global timeZoneNames
+    newString = ''
+    country = ''
+    for timeZone in timeZoneNames: # convert to good time zone country
+        timeZoneLower = timeZone.lower()
+        basicCountryLower = basicCountry.split(' ')[-1].lower()
+        if basicCountryLower in timeZoneLower:
+            if basicCountryLower == 'iran' and "tirane" in timeZoneLower:
+                continue
+            if basicCountryLower == 'spain' and "port" in timeZoneLower:
+                continue
+            country = timeZone
+            break        
+    
+    timeString = date + ' ' + time
+
+    if country != '':
+        IsraelTime = convertTime(timeString, country, 'Israel')
+        print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
+        newString += IsraelTime + ','
+    else:
+        for i, word in enumerate(countries2UTCList[0]):
+            utcString = ''
+            basicCountryLower = basicCountry.split(' ')[-1].lower()
+            if basicCountryLower in word.lower():
+                # print(word.lower() + ' ' + word)
+                utcString = countries2UTCList[1][i]
+                offsetMin = utcString*60 # todo: convert...
+                IsraelTime = IsraelTimeUTC(timeString, offsetMin, 'Israel')
+                print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
+                newString += IsraelTime + ','
+                break
+        if utcString == '':
+            print('error date:' + date)
+    return newString.replace(' ', ',')
+
 
 def rowString2finalString(stringArray):
     global timeZoneNames
@@ -88,12 +137,14 @@ def rowString2finalString(stringArray):
     time = ''
     basicCountry = ''
     country = ''
+
     for i, word in enumerate(stringArray):
         if word=='Time':
             time = stringArray[i+1]
             if time == '':
                 time = '12:00' # could be changed!!!
             break
+    
     for i, word in enumerate(stringArray): # get raw coutry name
         if word=='Phase':
             basicCountry = stringArray[i-1]
@@ -116,7 +167,6 @@ def rowString2finalString(stringArray):
         print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
         newString += IsraelTime + ','
     else:
-        
         for i, word in enumerate(countries2UTCList[0]):
             utcString = ''
             basicCountryLower = basicCountry.split(' ')[-1].lower()
@@ -132,16 +182,16 @@ def rowString2finalString(stringArray):
             print('error date:' + stringArray[0])
     return newString
 
-with open('accidentDB 1993 - 2024.csv') as file_obj: 
+with open(choose_file('accidentDB 1993 - 2024.csv')) as file_obj: 
     reader_obj = csv.reader(file_obj)
     for row in reader_obj:
         newString = rowString2finalString(row)
         timeData.append(newString)
 
 
-with open('accidentDB IsraelTime.csv', 'w') as f:
+# with open('accidentDB IsraelTime.csv', 'w') as f:
     
-    labelString = 'Date,Israel Time'
-    f.write(f"{labelString}\n")
-    for line in timeData:
-        f.write(f"{line}\n")
+#     labelString = 'Date,Israel Time'
+#     f.write(f"{labelString}\n")
+#     for line in timeData:
+#         f.write(f"{line}\n")
