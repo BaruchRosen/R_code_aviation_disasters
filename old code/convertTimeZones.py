@@ -111,14 +111,12 @@ def convertTime_2(basicCountry, date, time):
 
     if country != '':
         IsraelTime = convertTime(timeString, country, 'Israel')
-        # print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
         newString += IsraelTime
     else:
         for i, word in enumerate(countries2UTCList[0]):
             utcString = ''
             basicCountryLower = basicCountry.split(' ')[-1].lower()
             if basicCountryLower in word.lower():
-                # print(word.lower() + ' ' + word)
                 utcString = countries2UTCList[1][i]
                 offsetMin = utcString*60 # todo: convert...
                 IsraelTime = IsraelTimeUTC(timeString, offsetMin, 'Israel')
@@ -134,7 +132,6 @@ def convertTime_2(basicCountry, date, time):
 def rowString2finalString(stringArray):
     global timeZoneNames
     newString = stringArray[0] + ',' # Date ,
-    # try to find time!
     time = ''
     basicCountry = ''
     country = ''
@@ -189,10 +186,3 @@ with open(choose_file('accidentDB 1993 - 2024.csv')) as file_obj:
         newString = rowString2finalString(row)
         timeData.append(newString)
 
-
-# with open('accidentDB IsraelTime.csv', 'w') as f:
-    
-#     labelString = 'Date,Israel Time'
-#     f.write(f"{labelString}\n")
-#     for line in timeData:
-#         f.write(f"{line}\n")

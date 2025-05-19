@@ -2,19 +2,27 @@ import pandas as pd
 import time
 import datetime
 from pandas import Timestamp
+from tkinter import filedialog
+
+def choose_file(message):
+    filepath = filedialog.askopenfilename(
+        title=message,
+        filetypes=[("All files", "*.*"), ("Text files", "*.txt")]
+    )
+    return filepath
 
 # get holidays
-holydaysData = pd.read_excel("holidays 1993-2024.xlsx")
+holydaysData = pd.read_excel(choose_file('holidays 1993-2024.xlsx'))
 dates_after_holday = holydaysData['Day after holiday'].tolist()
 
 # aero accidents
-aeroDATA = pd.read_csv("accidentDB complete.csv")
-accident_dates = aeroDATA['Israel Date'].tolist()
+aeroDATA = pd.read_csv(choose_file("accidentDB complete.csv"))
+accident_dates = aeroDATA['IsraelDate'].tolist()
 # todo: add condition by time to pass the by one day if accident happend after 17:00!!!!!!!!
 accident_dates = [datetime.datetime.strptime(date, "%d/%m/%Y") for date in accident_dates]
 
 # market DATA
-market = pd.read_excel("TA125_full.xlsx")
+market = pd.read_excel(choose_file("TA125_full.xlsx"))
 market_dates = market['Date'].tolist()
 # add coulmn to indicate days after holiday
 after_holiday = []
