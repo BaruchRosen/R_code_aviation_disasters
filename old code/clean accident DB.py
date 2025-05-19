@@ -32,11 +32,6 @@ def rowString2finalString(stringArray):
     
     newString += ',' + conv.convertTime_2(basicCountry, stringArray[0], time) 
 
-    # for col in ['Time', 'Fatalities']:
-    #     newString += ',' + getElement(col, stringArray)
-    # israelDate =  ',' + 'IsraelDate'
-    # israelTime = ',' + 'IsraelTime'
-    # newString += israelDate + israelTime
     return newString
 
 

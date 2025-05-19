@@ -34,7 +34,7 @@ def IsraelTimeUTC(date_time, utcMIN, targetCountry = 'Asia/Jerusalem'):
     localized_time = utc_offset.localize(dt)
     israel_tz = pytz.timezone('Asia/Jerusalem')
     israel_time = localized_time.astimezone(israel_tz)
-    return israel_time.strftime('%Y-%m-%d %H:%M:%S')
+    return israel_time.strftime('%d/%m/%Y %H:%M:%S')
 
 
 def convertTime(date_time, country, targetCountry = 'Asia/Jerusalem'):
@@ -63,9 +63,9 @@ def convertTime(date_time, country, targetCountry = 'Asia/Jerusalem'):
     target_time = localized_time.astimezone(to_zone)
 
     # Print both times
-    print(f"Time in {from_zone.zone}: {localized_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Time in {to_zone.zone}: {target_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    return target_time.strftime('%Y-%m-%d %H:%M:%S')
+    print(f"Time in {from_zone.zone}: {localized_time.strftime('%d/%m/%Y %H:%M:%S')}")
+    print(f"Time in {to_zone.zone}: {target_time.strftime('%d/%m/%Y %H:%M:%S')}")
+    return target_time.strftime('%d/%m/%Y %H:%M:%S')
 #ccant deal with hebrew path!
 TimeZonesData = pd.read_excel(choose_file('countryTimeZones.xlsx'))
 timeZoneNames = TimeZonesData['TimeZones'].tolist()
@@ -111,8 +111,8 @@ def convertTime_2(basicCountry, date, time):
 
     if country != '':
         IsraelTime = convertTime(timeString, country, 'Israel')
-        print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
-        newString += IsraelTime + ','
+        # print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
+        newString += IsraelTime
     else:
         for i, word in enumerate(countries2UTCList[0]):
             utcString = ''
@@ -123,10 +123,11 @@ def convertTime_2(basicCountry, date, time):
                 offsetMin = utcString*60 # todo: convert...
                 IsraelTime = IsraelTimeUTC(timeString, offsetMin, 'Israel')
                 print(basicCountry + ' -> ' + country + ' '  + time + ' -> ' + IsraelTime)
-                newString += IsraelTime + ','
+                newString += IsraelTime
                 break
         if utcString == '':
             print('error date:' + date)
+            newString += date + ' ' + time
     return newString.replace(' ', ',')
 
 
