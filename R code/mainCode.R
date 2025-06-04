@@ -24,9 +24,24 @@ dataBase$thirdDayAfterAccident <- 0
 
 
 for (date in NYSE$Date) { # note: assuming no need to fix dates for NYSE trading
-  if(date %in% dataBase$Date){
+  # bug: for loop doesnt work!!
+  parts <- strsplit(date, "/")[[1]]
+  day <- as.integer(parts[3])
+  month <- as.integer(parts[2])
+  year <- parts[1]
+  
+  # Combine into new format
+  #dateInFormat <- paste0(day, "/", month, "/", year)
+  print(date)
+  
+  dateInFormat <- paste0(year, "-", month, "-", day)
+  
+  if(dateInFormat %in% dataBase$Date){
+    
+    
+    
     indexNYSE <- which(NYSE$Date == date)
-    index <- which(dataBase$Date == date)
+    index <- which(dataBase$Date == dateInFormat)
     dataBase$NYSE[index] <- NYSE$revenue[indexNYSE]
   }
 }

@@ -1,0 +1,6 @@
+1. "updated code\asnCrawler_stage1.py" - crawl the web site for air accidents. -> create the file "accidentDB 1993 - 2024.csv"
+2. "updated code\clean accident DB.py" - clean the accident data and add Israel time and date. ->  create the file "accidentDB res.csv"
+3. "updated code/combine TA125_holidays_accidents.py" - combine with stock, holidays & NYSE data. ->  create the file "text.csv"
+
+
+note: the file "updated code\convertTimeZones.py" is used as library functions only.

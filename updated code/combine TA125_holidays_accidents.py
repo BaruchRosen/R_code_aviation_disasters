@@ -47,4 +47,4 @@ for date in market_dates:
         afterAccidentDays.append(0)
 market['afterAccidentDays'] = afterAccidentDays
 
-market.to_excel('text.xlsx', index=False)
+market.to_csv('text.csv', index=False)
