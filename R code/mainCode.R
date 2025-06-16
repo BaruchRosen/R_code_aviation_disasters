@@ -9,12 +9,12 @@ dataBase <- read.csv(path_main_db)
 accidentsDB <- read.csv(path_accidents_db)
 exchangeRateIsraelBank <- read.csv(path_exchange_rates)
 
-dataBase$exchangeRate <- 0
+# dataBase$exchangeRate <- 0
 
-dataBase$DayOfAccident <- 0
-dataBase$firstDayAfterAccident <- 0
-dataBase$secondDayAfterAccident <- 0
-dataBase$thirdDayAfterAccident <- 0
+#dataBase$DayOfAccident <- 0
+#dataBase$firstDayAfterAccident <- 0
+#dataBase$secondDayAfterAccident <- 0
+#dataBase$thirdDayAfterAccident <- 0
 
 # accidentsDB <- fixTradingDates(accidentsDB)  #should already be fixed by Efrat!
 
@@ -62,18 +62,19 @@ dataBase$after_holiday <- as.factor(dataBase$after_holiday)
 
 # calculate mean return on every day vs days after accident
 simple_avg <- mean(dataBase$revenue, na.rm = TRUE)
-day_accident <- mean(dataBase[dataBase$super == -1, 'revenue'])
-first_day_after_accident <- mean(dataBase[dataBase$super == 1, 'revenue'])
-sec_day_after_accident <- mean(dataBase[dataBase$super == 2, 'revenue'], na.rm = TRUE)
-third_day_after_accident <- mean(dataBase[dataBase$super == 3, 'revenue'])
+day_accident <- mean(dataBase[dataBase$afterAccidentDays == -1, 'revenue'])
+first_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 1, 'revenue'])
+sec_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 2, 'revenue'], na.rm = TRUE)
+third_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 3, 'revenue'])
 
 # calculate mean return on every day vs days after accident
 simple_avgNYSE <- mean(dataBase$NYSE, na.rm = TRUE)
-day_accidentNYSE <- mean(dataBase[dataBase$super == -1, 'NYSE'])
-first_day_after_accidentNYSE <- mean(dataBase[dataBase$super == 1, 'NYSE'])
-sec_day_after_accidentNYSE <- mean(dataBase[dataBase$super == 2, 'NYSE'], na.rm = TRUE)
-third_day_after_accidentNYSE <- mean(dataBase[dataBase$super == 3, 'NYSE'])
+day_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == -1, 'NYSE'])
+first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, 'NYSE'])
+sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'NYSE'], na.rm = TRUE)
+third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'NYSE'])
 
+dataBase$afterAccidentDays <- as.factor(dataBase$afterAccidentDays)
 
 
 
