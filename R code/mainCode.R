@@ -62,17 +62,17 @@ dataBase$after_holiday <- as.factor(dataBase$after_holiday)
 
 # calculate mean return on every day vs days after accident
 simple_avg <- mean(dataBase$revenue, na.rm = TRUE)
-day_accident <- mean(dataBase[dataBase$afterAccidentDays == -1, 'revenue'])
-first_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 1, 'revenue'])
+day_accident <- mean(dataBase[dataBase$afterAccidentDays == -1, 'revenue'], na.rm = TRUE)
+first_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 1, 'revenue'], na.rm = TRUE)
 sec_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 2, 'revenue'], na.rm = TRUE)
-third_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 3, 'revenue'])
+third_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 3, 'revenue'], na.rm = TRUE)
 
 # calculate mean return on every day vs days after accident
 simple_avgNYSE <- mean(dataBase$NYSE, na.rm = TRUE)
-day_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == -1, 'NYSE'])
-first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, 'NYSE'])
-sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'NYSE'], na.rm = TRUE)
-third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'NYSE'])
+day_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == -1, 'revenue'], na.rm = TRUE)
+first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, 'revenue'], na.rm = TRUE)
+sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'revenue'], na.rm = TRUE)
+third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'revenue'], na.rm = TRUE)
 
 dataBase$afterAccidentDays <- as.factor(dataBase$afterAccidentDays)
 
@@ -88,25 +88,25 @@ dataBase$super <- -1
 
 id <- 1
 for (x in dataBase$DayOfAccident) {
-  if(dataBase$DayOfAccident[id]==1){
+  if(dataBase$DayOfAccident[id]==0){
     dataBase$super[id] <- 0
   }
   if(dataBase$firstDayAfterAccident[id]==1){
     dataBase$super[id] <- 1
   }
-  if(dataBase$secondDayAfterAccident[id]==1){
+  if(dataBase$secondDayAfterAccident[id]==2){
     dataBase$super[id] <- 2
   }
-  if(dataBase$thirdDayAfterAccident[id]==1){
+  if(dataBase$thirdDayAfterAccident[id]==3){
     dataBase$super[id] <- 3
   }
   id <- id+1
 }
 
 dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
-dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
-dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
-dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
+#dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
+#dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
+#dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
 
 dataBase$super <- as.factor(dataBase$super)
 
@@ -118,7 +118,7 @@ geom_histogramPlot(dataBase)
 #CAR
 car_days <- c(-5:13)*0
 
-for (date in accidentsDB$correctDate) {
+for (date in accidentsDB$Israel.Date) {
     current_car <- 0
     for (i in c(-5:13)) {
         current_car <- current_car + (get_revenue_at_date(dataBase,add_days_to_date(date,i)) - simple_avg)
@@ -147,7 +147,7 @@ validation <- dataBase[idx == 1,]
 training <- dataBase[idx == 2,]
 
 # 4.2 build reg object
-reg <- lm(revenue ~ super + DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+TAX+after_holiday, data = training[, ]) 
+reg <- lm(revenue ~ afterAccidentDays + DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+TAX+after_holiday, data = training[, ]) 
 #reg <- lm(revenue ~ afterAccidentDays, data = training[, ]) 
 
 summary(reg)

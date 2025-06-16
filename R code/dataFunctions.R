@@ -18,6 +18,7 @@ check_in_time_range<- function(time_string){
 }
 
 fixTradingDates<- function(accidentsDB){
+  # note: this function is not needed. corrected in python!
   accidentsDB$correctDate <- 0
   for (date in accidentsDB$Israel.Date) {
     # check for the need to skip a date because of market working hours
@@ -33,7 +34,7 @@ fixTradingDates<- function(accidentsDB){
   return (accidentsDB)
 }
 
-NYSEadd_revenue <- function(NYSE_DB){
+NYSEadd_revenue <- function(NYSE_DB){ # not needed! done in python!
   NYSE$revenue <- 0
   for (precent in NYSE$Change) {
     index <- which(NYSE$Change == precent)
@@ -43,9 +44,14 @@ NYSEadd_revenue <- function(NYSE_DB){
 }
 
 
-get_revenue_at_date <- function(dataBase, date){
-  if(date %in% dataBase$Date){
-    index <- which(dataBase$Date == date)
+get_revenue_at_date <- function(dataBase, date){ # date - "%d/%m/%Y"
+  date_parts <- strsplit(date, "/")[[1]]
+  year <- as.integer(date_parts[3])
+  month <- as.integer(date_parts[2])
+  day <- as.integer(date_parts[1])
+  new_date <- paste(year, month, day, sep = "-")
+  if(new_date %in% dataBase$Date){ # compare to string "1993-09-23"
+    index <- which(dataBase$Date == new_date)
     return(dataBase$revenue[index])
   }
   return (0)
