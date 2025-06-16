@@ -3,6 +3,7 @@ import time
 import datetime
 from pandas import Timestamp
 from tkinter import filedialog
+from datetime import timedelta
 
 def choose_file(message):
     filepath = filedialog.askopenfilename(
@@ -11,6 +12,11 @@ def choose_file(message):
     )
     return filepath
 
+def get_hour(hour_string):  # format "12:46:00"
+    hour_only_string = hour_string.split(':')[0]
+    return int(hour_only_string)
+
+
 # get holidays
 holydaysData = pd.read_excel(choose_file('holidays 1993-2024.xlsx'))
 dates_after_holday = holydaysData['Day after holiday'].tolist()
@@ -18,8 +24,12 @@ dates_after_holday = holydaysData['Day after holiday'].tolist()
 # aero accidents
 aeroDATA = pd.read_csv(choose_file("accidentDB complete.csv"))
 accident_dates = aeroDATA['IsraelDate'].tolist()
-# todo: add condition by time to pass the by one day if accident happend after 17:00!!!!!!!!
+accident_hours = aeroDATA['IsraelTime'].tolist()
+
 accident_dates = [datetime.datetime.strptime(date, "%d/%m/%Y") for date in accident_dates]
+for i in range(len(accident_dates)): # todo: add condition by time to pass the by one day if accident happend after 17:00!!!!!!!!
+    if get_hour(accident_hours[i]) > 17:
+        accident_dates[i] = accident_dates[i] + timedelta(days=1)
 
 # market DATA
 market = pd.read_excel(choose_file("TA125_full.xlsx"))
