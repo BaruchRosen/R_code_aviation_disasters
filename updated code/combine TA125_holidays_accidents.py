@@ -57,4 +57,18 @@ for date in market_dates:
         afterAccidentDays.append(0)
 market['afterAccidentDays'] = afterAccidentDays
 
+
+NYSE = pd.read_csv(choose_file("NYSE.csv"))
+NYSE_Dates = [datetime.datetime.strptime(date, '%d/%m/%Y') for date in NYSE['Date'].tolist()]
+nyse_rev = NYSE['Change'].tolist()
+nyse_revenue = [float(ele.split('%')[0]) for ele in nyse_rev]
+NYSE_revenue_for_file = []
+for date in market_dates:
+    if date in NYSE_Dates:
+        NYSE_revenue_for_file.append(nyse_revenue[NYSE_Dates.index(market_dates[i])])
+    else:
+        NYSE_revenue_for_file.append(0)
+market['NYSE_revenue'] = NYSE_revenue_for_file
+
+
 market.to_csv('text.csv', index=False)
