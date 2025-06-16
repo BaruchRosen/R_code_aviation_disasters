@@ -8,7 +8,7 @@ def getElementAfterWord(element, array):
             break
     return array[i+1]
 
-def getElement(element, array): # tring to find 'Date' which isnt there... - fix
+def getElement(element, array):
     for i,ele in enumerate(array):
         if ele == element:
             break
@@ -35,7 +35,7 @@ def rowString2finalString(stringArray):
     return newString
 
 
-columnNames = ['Date', 'Time', 'Fatalities'] # , 'IsraelDate', 'IsraelTime'
+columnNames = ['Date', 'Time', 'Fatalities']
 newData = []
 
 original_file = conv.choose_file('accidentDB 1993 - 2024.csv')
