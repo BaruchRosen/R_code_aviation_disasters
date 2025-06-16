@@ -47,11 +47,15 @@ market['after_holiday'] = after_holiday
 # add coulmn to indicate days of accidents
 afterAccidentDays = []
 for date in market_dates:
+    # if date +  datetime.timedelta(days=1) in accident_dates :
+    #     afterAccidentDays.append(-1) 
     if date in accident_dates:
-        afterAccidentDays.append(1)
+        afterAccidentDays.append(-1)
     elif date - datetime.timedelta(days=1) in accident_dates:
-        afterAccidentDays.append(2)
+        afterAccidentDays.append(1)
     elif date - datetime.timedelta(days=2) in accident_dates:
+        afterAccidentDays.append(2)
+    elif date - datetime.timedelta(days=3) in accident_dates:
         afterAccidentDays.append(3)
     else:
         afterAccidentDays.append(0)
@@ -61,11 +65,11 @@ market['afterAccidentDays'] = afterAccidentDays
 NYSE = pd.read_csv(choose_file("NYSE.csv"))
 NYSE_Dates = [datetime.datetime.strptime(date, '%d/%m/%Y') for date in NYSE['Date'].tolist()]
 nyse_rev = NYSE['Change'].tolist()
-nyse_revenue = [float(ele.split('%')[0]) for ele in nyse_rev]
+nyse_revenue = [0.01*float(ele.split('%')[0]) for ele in nyse_rev]
 NYSE_revenue_for_file = []
 for date in market_dates:
     if date in NYSE_Dates:
-        NYSE_revenue_for_file.append(nyse_revenue[NYSE_Dates.index(market_dates[i])])
+        NYSE_revenue_for_file.append(nyse_revenue[NYSE_Dates.index(date)])
     else:
         NYSE_revenue_for_file.append(0)
 market['NYSE_revenue'] = NYSE_revenue_for_file

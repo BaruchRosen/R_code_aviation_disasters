@@ -9,10 +9,6 @@ dataBase <- read.csv(path_main_db)
 accidentsDB <- read.csv(path_accidents_db)
 exchangeRateIsraelBank <- read.csv(path_exchange_rates)
 
-NYSE <- read.csv(path_NYSE)
-NYSE <- NYSEadd_revenue(NYSE)
-
-dataBase$NYSE <- 0
 dataBase$exchangeRate <- 0
 
 dataBase$DayOfAccident <- 0
@@ -23,28 +19,6 @@ dataBase$thirdDayAfterAccident <- 0
 # accidentsDB <- fixTradingDates(accidentsDB)  #should already be fixed by Efrat!
 
 
-for (date in NYSE$Date) { # note: assuming no need to fix dates for NYSE trading
-  # bug: for loop doesnt work!!
-  parts <- strsplit(date, "/")[[1]]
-  day <- as.integer(parts[3])
-  month <- as.integer(parts[2])
-  year <- parts[1]
-  
-  # Combine into new format
-  #dateInFormat <- paste0(day, "/", month, "/", year)
-  print(date)
-  
-  dateInFormat <- paste0(year, "-", month, "-", day)
-  
-  if(dateInFormat %in% dataBase$Date){
-    
-    
-    
-    indexNYSE <- which(NYSE$Date == date)
-    index <- which(dataBase$Date == dateInFormat)
-    dataBase$NYSE[index] <- NYSE$revenue[indexNYSE]
-  }
-}
 # not needed after fix all data in super!
 # for (date in accidentsDB$Israel.Date) {
 #   # check for the need to skip a date because of market working hours
