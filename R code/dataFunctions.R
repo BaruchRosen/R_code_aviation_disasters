@@ -59,5 +59,5 @@ get_revenue_at_date <- function(dataBase, date, country = "Israel"){ # date - "%
     }
     
   }
-  return (0)
+  return (-999)
 }

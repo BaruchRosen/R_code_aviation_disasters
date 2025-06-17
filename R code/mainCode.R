@@ -33,39 +33,31 @@ first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, '
 sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'NYSE_revenue'], na.rm = TRUE)
 third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'NYSE_revenue'], na.rm = TRUE)
 
-# fix t - test. the coulmns dont exist!!!
-# Israel.first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
-# Israel.sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
-# Israel.third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
+dataBase$firstDayAfterAccident <- 0
+dataBase$secondDayAfterAccident <- 0
+dataBase$thirdDayAfterAccident <- 0
 
+id <- 1
+for (x in dataBase$DayOfAccident) {
+  if(dataBase$afterAccidentDays[id]==1){
+    dataBase$firstDayAfterAccident[id] <- 1
+  }
+  if(dataBase$afterAccidentDays[id]==2){
+    dataBase$secondDayAfterAccident[id] <- 2
+  }
+  if(dataBase$afterAccidentDays[id]==3){
+    dataBase$thirdDayAfterAccident[id] <- 3
+  }
+  id <- id+1
+}
 
-# 
-# dataBase$super <- -1
-# 
-# id <- 1
-# for (x in dataBase$DayOfAccident) {
-#   if(dataBase$DayOfAccident[id]==0){
-#     dataBase$super[id] <- 0
-#   }
-#   if(dataBase$firstDayAfterAccident[id]==1){
-#     dataBase$super[id] <- 1
-#   }
-#   if(dataBase$secondDayAfterAccident[id]==2){
-#     dataBase$super[id] <- 2
-#   }
-#   if(dataBase$thirdDayAfterAccident[id]==3){
-#     dataBase$super[id] <- 3
-#   }
-#   id <- id+1
-# }
+Israel.first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
+Israel.sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
+Israel.third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
 
-# dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
-#dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
-#dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
-#dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
-
-# dataBase$super <- as.factor(dataBase$super)
-
+USA.first_tTest <- t.test(dataBase$NYSE_revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
+USA.sec_tTest <- t.test(dataBase$NYSE_revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
+USA.third_tTest <- t.test(dataBase$NYSE_revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
 
 #Plot
 stat_ecdfPlot(dataBase, "israel")
@@ -75,27 +67,30 @@ stat_ecdfPlot(dataBase, "usa")
 geom_histogramPlot(dataBase, "usa")
 
 #CAR - Israel
-car_days <- c(-5:13)*0
+car_days <- c(-5:200)*0
 
 for (date in accidentsDB$Israel.Date) {
     current_car <- 0
-    for (i in c(-5:13)) {
+    for (i in c(-5:200)) {
       current_day <- add_days_to_date(date,i)
-      daily_abnormal_revenue <- get_revenue_at_date(dataBase,current_day) - simple_avg
-      print(current_day)
+      daily_revenue <- get_revenue_at_date(dataBase,current_day,"Israel")
+      if(daily_revenue==-999){
+        daily_abnormal_revenue <- 0 # days without revenue don't effect the CAR!
+        # should cover also dates that don't exist in the TA125 DB!
+      }else{
+        daily_abnormal_revenue <- daily_revenue - simple_avg
+      }
       current_car <- current_car + daily_abnormal_revenue
-      print(current_car)
       car_days[i+6] <- car_days[i+6] + current_car
     }
-  print(car_days)
 }
- 
+
 
 
 # plot CAR results
 x_name <- "x"
 y_name <- "y"
-days  <- c(-5:13)
+days  <- c(-5:200)
 df <- data.frame(days,car_days)
 names(df) <- c(x_name,y_name)
 
@@ -110,13 +105,16 @@ for (date in accidentsDB$Israel.Date) { # note: for accuracy of day alignment ta
   current_car <- 0
   for (i in c(-5:13)) {
     current_day <- add_days_to_date(date,i)
-    daily_abnormal_revenue <- get_revenue_at_date(dataBase,current_day, "USA") - simple_avg
-    print(current_day)
+    daily_revenue <- get_revenue_at_date(dataBase,current_day,"USA")
+    if(daily_revenue==-999){
+      daily_abnormal_revenue <- 0 # days without revenue don't effect the CAR!
+    }else{
+      daily_abnormal_revenue <- daily_revenue - simple_avg
+    }
+    
     current_car <- current_car + daily_abnormal_revenue
-    print(current_car)
     car_days[i+6] <- car_days[i+6] + current_car
   }
-  print(car_days)
 }
 
 
