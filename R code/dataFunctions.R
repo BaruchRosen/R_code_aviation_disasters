@@ -44,7 +44,7 @@ NYSEadd_revenue <- function(NYSE_DB){ # not needed! done in python!
 }
 
 
-get_revenue_at_date <- function(dataBase, date){ # date - "%d/%m/%Y"
+get_revenue_at_date <- function(dataBase, date, country = "Israel"){ # date - "%d/%m/%Y"
   date_parts <- strsplit(date, "/")[[1]]
   year <- as.integer(date_parts[3])
   month <- as.integer(date_parts[2])
@@ -52,7 +52,12 @@ get_revenue_at_date <- function(dataBase, date){ # date - "%d/%m/%Y"
   new_date <- paste(year, month, day, sep = "-")
   if(new_date %in% dataBase$Date){ # compare to string "1993-09-23"
     index <- which(dataBase$Date == new_date)
-    return(dataBase$revenue[index])
+    if(country=="Israel"){
+      return(dataBase$revenue[index])
+    }else{
+      return(dataBase$NYSE_revenue[index])
+    }
+    
   }
   return (0)
 }

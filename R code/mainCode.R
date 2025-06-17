@@ -7,57 +7,16 @@ source("plots.R")
 
 dataBase <- read.csv(path_main_db)
 accidentsDB <- read.csv(path_accidents_db)
-exchangeRateIsraelBank <- read.csv(path_exchange_rates)
+#exchangeRateIsraelBank <- read.csv(path_exchange_rates)
 
-# dataBase$exchangeRate <- 0
+# accidentsDB <- fixTradingDates(accidentsDB)  #should already be fixed by python!
 
-#dataBase$DayOfAccident <- 0
-#dataBase$firstDayAfterAccident <- 0
-#dataBase$secondDayAfterAccident <- 0
-#dataBase$thirdDayAfterAccident <- 0
-
-# accidentsDB <- fixTradingDates(accidentsDB)  #should already be fixed by Efrat!
-
-
-# not needed after fix all data in super!
-# for (date in accidentsDB$Israel.Date) {
-#   # check for the need to skip a date because of market working hours
-#   index_accident <- which(accidentsDB$Israel.Date == date)
-#   hour <- accidentsDB$Israel.Time[index_accident]
-#   if(check_in_time_range(hour)==FALSE){
-#     new_date <- add_days_to_date(date, 1)
-#   }else{
-#     new_date <- date
-#   }
-#   # test this function - day of accident marked bad...
-#   if(new_date %in% dataBase$Date){
-#     index <- which(dataBase$Date == new_date)
-#     dataBase$DayOfAccident[index] = 1
-#   }
-#   day1 <- add_days_to_date(new_date,1)
-#   day2 <- add_days_to_date(new_date,2)
-#   day3 <- add_days_to_date(new_date,3)
-#   if(day1 %in% dataBase$Date){
-#     index <- which(dataBase$Date == day1)
-#     dataBase$firstDayAfterAccident[index] = 1
-#   }
-#   if(day2 %in% dataBase$Date){
-#     index <- which(dataBase$Date == day2)
-#     dataBase$secondDayAfterAccident[index] = 1
-#   }
-#   if(day3 %in% dataBase$Date){
-#     index <- which(dataBase$Date == day3)
-#     dataBase$thirdDayAfterAccident[index] = 1
-#   }
-# 
-# }
 
 # set all categorical data types...
 dataBase$DOW <- as.factor(dataBase$DOW)
-
 dataBase$TAX <- as.factor(dataBase$TAX)
 dataBase$after_holiday <- as.factor(dataBase$after_holiday)
-
+dataBase$afterAccidentDays <- as.factor(dataBase$afterAccidentDays)
 
 
 # calculate mean return on every day vs days after accident
@@ -68,61 +27,65 @@ sec_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 2, 'revenu
 third_day_after_accident <- mean(dataBase[dataBase$afterAccidentDays == 3, 'revenue'], na.rm = TRUE)
 
 # calculate mean return on every day vs days after accident
-simple_avgNYSE <- mean(dataBase$NYSE, na.rm = TRUE)
-day_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == -1, 'revenue'], na.rm = TRUE)
-first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, 'revenue'], na.rm = TRUE)
-sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'revenue'], na.rm = TRUE)
-third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'revenue'], na.rm = TRUE)
+simple_avgNYSE <- mean(dataBase$NYSE_revenue, na.rm = TRUE)
+day_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == -1, 'NYSE_revenue'], na.rm = TRUE)
+first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, 'NYSE_revenue'], na.rm = TRUE)
+sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'NYSE_revenue'], na.rm = TRUE)
+third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'NYSE_revenue'], na.rm = TRUE)
 
-dataBase$afterAccidentDays <- as.factor(dataBase$afterAccidentDays)
-
-
-
-
-first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
-sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
-third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
+# fix t - test. the coulmns dont exist!!!
+# Israel.first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
+# Israel.sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
+# Israel.third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
 
 
-dataBase$super <- -1
+# 
+# dataBase$super <- -1
+# 
+# id <- 1
+# for (x in dataBase$DayOfAccident) {
+#   if(dataBase$DayOfAccident[id]==0){
+#     dataBase$super[id] <- 0
+#   }
+#   if(dataBase$firstDayAfterAccident[id]==1){
+#     dataBase$super[id] <- 1
+#   }
+#   if(dataBase$secondDayAfterAccident[id]==2){
+#     dataBase$super[id] <- 2
+#   }
+#   if(dataBase$thirdDayAfterAccident[id]==3){
+#     dataBase$super[id] <- 3
+#   }
+#   id <- id+1
+# }
 
-id <- 1
-for (x in dataBase$DayOfAccident) {
-  if(dataBase$DayOfAccident[id]==0){
-    dataBase$super[id] <- 0
-  }
-  if(dataBase$firstDayAfterAccident[id]==1){
-    dataBase$super[id] <- 1
-  }
-  if(dataBase$secondDayAfterAccident[id]==2){
-    dataBase$super[id] <- 2
-  }
-  if(dataBase$thirdDayAfterAccident[id]==3){
-    dataBase$super[id] <- 3
-  }
-  id <- id+1
-}
-
-dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
+# dataBase$DayOfAccident <- as.factor(dataBase$DayOfAccident)
 #dataBase$firstDayAfterAccident <- as.factor(dataBase$firstDayAfterAccident)
 #dataBase$secondDayAfterAccident <- as.factor(dataBase$secondDayAfterAccident)
 #dataBase$thirdDayAfterAccident <- as.factor(dataBase$thirdDayAfterAccident)
 
-dataBase$super <- as.factor(dataBase$super)
+# dataBase$super <- as.factor(dataBase$super)
 
 
 #Plot
-stat_ecdfPlot(data = dataBase)
-geom_histogramPlot(dataBase)
+stat_ecdfPlot(dataBase, "israel")
+geom_histogramPlot(dataBase, "israel")
 
-#CAR
+stat_ecdfPlot(dataBase, "usa")
+geom_histogramPlot(dataBase, "usa")
+
+#CAR - Israel
 car_days <- c(-5:13)*0
 
 for (date in accidentsDB$Israel.Date) {
     current_car <- 0
     for (i in c(-5:13)) {
-        current_car <- current_car + (get_revenue_at_date(dataBase,add_days_to_date(date,i)) - simple_avg)
-        car_days[i+6] <- car_days[i+6] + current_car
+      current_day <- add_days_to_date(date,i)
+      daily_abnormal_revenue <- get_revenue_at_date(dataBase,current_day) - simple_avg
+      print(current_day)
+      current_car <- current_car + daily_abnormal_revenue
+      print(current_car)
+      car_days[i+6] <- car_days[i+6] + current_car
     }
   print(car_days)
 }
@@ -138,6 +101,35 @@ names(df) <- c(x_name,y_name)
 
 ggplot(df, aes(x = x, y = y)) + geom_line()+
   labs(x="Days relative to disaster date (t = 0)" , y = "Cumulative abnormal rate of return")
+
+
+#CAR - USA
+car_days <- c(-5:13)*0
+
+for (date in accidentsDB$Israel.Date) { # note: for accuracy of day alignment take usa date!
+  current_car <- 0
+  for (i in c(-5:13)) {
+    current_day <- add_days_to_date(date,i)
+    daily_abnormal_revenue <- get_revenue_at_date(dataBase,current_day, "USA") - simple_avg
+    print(current_day)
+    current_car <- current_car + daily_abnormal_revenue
+    print(current_car)
+    car_days[i+6] <- car_days[i+6] + current_car
+  }
+  print(car_days)
+}
+
+
+
+# plot CAR results
+x_name <- "x"
+y_name <- "y"
+days  <- c(-5:13)
+df <- data.frame(days,car_days)
+names(df) <- c(x_name,y_name)
+
+ggplot(df, aes(x = x, y = y)) + geom_line()+
+  labs(x="Days relative to disaster date (t = 0)" , y = "Cumulative abnormal rate of return USA")
 
 
 set.seed(1)
