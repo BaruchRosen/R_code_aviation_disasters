@@ -67,11 +67,11 @@ stat_ecdfPlot(dataBase, "usa")
 geom_histogramPlot(dataBase, "usa")
 
 #CAR - Israel
-car_days <- c(-5:200)*0
+car_days <- c(-5:10)*0
 
 for (date in accidentsDB$Israel.Date) {
     current_car <- 0
-    for (i in c(-5:200)) {
+    for (i in c(-5:10)) {
       current_day <- add_days_to_date(date,i)
       daily_revenue <- get_revenue_at_date(dataBase,current_day,"Israel")
       if(daily_revenue==-999){
@@ -90,7 +90,7 @@ for (date in accidentsDB$Israel.Date) {
 # plot CAR results
 x_name <- "x"
 y_name <- "y"
-days  <- c(-5:200)
+days  <- c(-5:10)
 df <- data.frame(days,car_days)
 names(df) <- c(x_name,y_name)
 
