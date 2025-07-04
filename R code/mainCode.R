@@ -33,31 +33,32 @@ first_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 1, '
 sec_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 2, 'NYSE_revenue'], na.rm = TRUE)
 third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, 'NYSE_revenue'], na.rm = TRUE)
 
-dataBase$firstDayAfterAccident <- 0
-dataBase$secondDayAfterAccident <- 0
-dataBase$thirdDayAfterAccident <- 0
+dataBase$firstDayAfterAccident <- ifelse(dataBase$afterAccidentDays == "1", 1, 0)
+dataBase$secondDayAfterAccident <- ifelse(dataBase$afterAccidentDays == "2", 1, 0)
+dataBase$thirdDayAfterAccident <- ifelse(dataBase$afterAccidentDays == "3", 1, 0)
+# 
+# id <- 1
+# for (x in dataBase$DayOfAccident) {
+#   if(dataBase$afterAccidentDays[id]==1){
+#     dataBase$firstDayAfterAccident[id] <- 1
+#   }
+#   if(dataBase$afterAccidentDays[id]==2){
+#     dataBase$secondDayAfterAccident[id] <- 2
+#   }
+#   if(dataBase$afterAccidentDays[id]==3){
+#     dataBase$thirdDayAfterAccident[id] <- 3
+#   }
+#   id <- id+1
+# }
 
-id <- 1
-for (x in dataBase$DayOfAccident) {
-  if(dataBase$afterAccidentDays[id]==1){
-    dataBase$firstDayAfterAccident[id] <- 1
-  }
-  if(dataBase$afterAccidentDays[id]==2){
-    dataBase$secondDayAfterAccident[id] <- 2
-  }
-  if(dataBase$afterAccidentDays[id]==3){
-    dataBase$thirdDayAfterAccident[id] <- 3
-  }
-  id <- id+1
-}
+Israel.first_tTest <- t.test(revenue ~ firstDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
+Israel.sec_tTest <- t.test(revenue ~ secondDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
+Israel.third_tTest <- t.test(revenue ~ thirdDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
 
-Israel.first_tTest <- t.test(dataBase$revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
-Israel.sec_tTest <- t.test(dataBase$revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
-Israel.third_tTest <- t.test(dataBase$revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
 
-USA.first_tTest <- t.test(dataBase$NYSE_revenue, dataBase$firstDayAfterAccident, data = dataBase, var.equal = TRUE)
-USA.sec_tTest <- t.test(dataBase$NYSE_revenue, dataBase$secondDayAfterAccident, data = dataBase, var.equal = TRUE)
-USA.third_tTest <- t.test(dataBase$NYSE_revenue, dataBase$thirdDayAfterAccident, data = dataBase, var.equal = TRUE)
+USA.first_tTest <- t.test(NYSE_revenue ~ firstDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
+USA.sec_tTest <- t.test(NYSE_revenue ~ secondDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
+USA.third_tTest <- t.test(NYSE_revenue ~ thirdDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
 
 #Plot
 stat_ecdfPlot(dataBase, "israel")
