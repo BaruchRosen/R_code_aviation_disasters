@@ -61,3 +61,40 @@ get_revenue_at_date <- function(dataBase, date, country = "Israel"){ # date - "%
   }
   return (-999)
 }
+
+CAR_AVG <- function(accidentDB, STOCKdb,country = "Israel"){
+  
+  #CAR - by avg.
+  car_days <- c(-5:13)*0
+  car_days_count <- c(-5:13)*0
+  
+  for (date in accidentDB$Israel.Date) {
+    current_car <- 0
+    for (i in c(-5:13)) {
+      current_day <- add_days_to_date(date,i)
+      if(country=="Israel"){
+        daily_revenue <- get_revenue_at_date(STOCKdb,current_day,"Israel")
+      }else{
+        daily_revenue <- get_revenue_at_date(STOCKdb,current_day,"USA")
+      }
+      
+      if(daily_revenue==-999){
+        daily_abnormal_revenue <- 0 # days without revenue don't effect the CAR!
+        # should cover also dates that don't exist in the TA125 DB!
+      }else{
+        daily_abnormal_revenue <- daily_revenue - simple_avg
+        current_car <- current_car + daily_abnormal_revenue
+        car_days[i+6] <- car_days[i+6] + current_car
+        car_days_count[i+6] <- car_days_count[i+6] + 1
+      }
+      
+    }
+  }
+  for (i in c(-5:13)) { # this step is to get the average CAR between the events.
+    # note that each date relative to the accident appears in different count due to 
+    # non market days and holidays!
+    car_days[i+6] <- car_days[i+6]/car_days_count[i+6]
+  }
+  
+  car_days
+}
