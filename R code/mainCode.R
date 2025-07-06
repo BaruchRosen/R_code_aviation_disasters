@@ -36,25 +36,10 @@ third_day_after_accidentNYSE <- mean(dataBase[dataBase$afterAccidentDays == 3, '
 dataBase$firstDayAfterAccident <- ifelse(dataBase$afterAccidentDays == "1", 1, 0)
 dataBase$secondDayAfterAccident <- ifelse(dataBase$afterAccidentDays == "2", 1, 0)
 dataBase$thirdDayAfterAccident <- ifelse(dataBase$afterAccidentDays == "3", 1, 0)
-# 
-# id <- 1
-# for (x in dataBase$DayOfAccident) {
-#   if(dataBase$afterAccidentDays[id]==1){
-#     dataBase$firstDayAfterAccident[id] <- 1
-#   }
-#   if(dataBase$afterAccidentDays[id]==2){
-#     dataBase$secondDayAfterAccident[id] <- 2
-#   }
-#   if(dataBase$afterAccidentDays[id]==3){
-#     dataBase$thirdDayAfterAccident[id] <- 3
-#   }
-#   id <- id+1
-# }
 
 Israel.first_tTest <- t.test(revenue ~ firstDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
 Israel.sec_tTest <- t.test(revenue ~ secondDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
 Israel.third_tTest <- t.test(revenue ~ thirdDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
-
 
 USA.first_tTest <- t.test(NYSE_revenue ~ firstDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
 USA.sec_tTest <- t.test(NYSE_revenue ~ secondDayAfterAccident, data = dataBase, alternative = "two.sided", var.equal = TRUE)
@@ -68,11 +53,12 @@ stat_ecdfPlot(dataBase, "usa")
 geom_histogramPlot(dataBase, "usa")
 
 #CAR - Israel
-car_days <- c(-5:10)*0
+car_days <- c(-5:13)*0
+car_days_count <- c(-5:13)*0
 
 for (date in accidentsDB$Israel.Date) {
     current_car <- 0
-    for (i in c(-5:10)) {
+    for (i in c(-5:13)) {
       current_day <- add_days_to_date(date,i)
       daily_revenue <- get_revenue_at_date(dataBase,current_day,"Israel")
       if(daily_revenue==-999){
@@ -80,18 +66,24 @@ for (date in accidentsDB$Israel.Date) {
         # should cover also dates that don't exist in the TA125 DB!
       }else{
         daily_abnormal_revenue <- daily_revenue - simple_avg
+        current_car <- current_car + daily_abnormal_revenue
+        car_days[i+6] <- car_days[i+6] + current_car
+        car_days_count[i+6] <- car_days_count[i+6] + 1
       }
-      current_car <- current_car + daily_abnormal_revenue
-      car_days[i+6] <- car_days[i+6] + current_car
+      
     }
 }
-
+for (i in c(-5:13)) { # this step is to get the avrege CAR between the events.
+  # note that each date relative to the accident appears in differnt count due to 
+  # non market days and holydays!
+  car_days[i+6] <- car_days[i+6]/car_days_count[i+6]
+}
 
 
 # plot CAR results
 x_name <- "x"
 y_name <- "y"
-days  <- c(-5:10)
+days  <- c(-5:13)
 df <- data.frame(days,car_days)
 names(df) <- c(x_name,y_name)
 
@@ -101,7 +93,7 @@ ggplot(df, aes(x = x, y = y)) + geom_line()+
 
 #CAR - USA
 car_days <- c(-5:13)*0
-
+car_days_count <- c(-5:13)*0
 for (date in accidentsDB$Israel.Date) { # note: for accuracy of day alignment take usa date!
   current_car <- 0
   for (i in c(-5:13)) {
@@ -111,13 +103,16 @@ for (date in accidentsDB$Israel.Date) { # note: for accuracy of day alignment ta
       daily_abnormal_revenue <- 0 # days without revenue don't effect the CAR!
     }else{
       daily_abnormal_revenue <- daily_revenue - simple_avg
+      current_car <- current_car + daily_abnormal_revenue
+      car_days[i+6] <- car_days[i+6] + current_car
+      car_days_count[i+6] <- car_days_count[i+6] + 1
     }
-    
-    current_car <- current_car + daily_abnormal_revenue
-    car_days[i+6] <- car_days[i+6] + current_car
   }
 }
 
+for (i in c(-5:13)) {
+  car_days[i+6] <- car_days[i+6]/car_days_count[i+6]
+}
 
 
 # plot CAR results
