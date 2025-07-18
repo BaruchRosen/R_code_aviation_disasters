@@ -3,7 +3,7 @@ options(scipen=999)
 source("dataFunctions.R")
 source("dataPaths.R")
 source("plots.R")
-
+library(dplyr)
 
 dataBase <- read.csv(path_main_db)
 accidentsDB <- read.csv(path_accidents_db)
@@ -53,32 +53,11 @@ stat_ecdfPlot(dataBase, "usa")
 geom_histogramPlot(dataBase, "usa")
 
 car_days <- CAR_AVG(accidentsDB, dataBase,country = "Israel")
-
-# plot CAR results
-x_name <- "x"
-y_name <- "y"
-days  <- c(-5:13)
-df <- data.frame(days,car_days)
-names(df) <- c(x_name,y_name)
-
-ggplot(df, aes(x = x, y = y)) + geom_line()+
-  scale_x_continuous(breaks = seq(-5,13,by=1)) + 
-  labs(x="Days relative to disaster date (t = 0)" , y = "Cumulative abnormal rate of return")
-
+plot_car(car_days, "Cumulative abnormal rate of return Israel")
 
 #CAR - USA
 car_days <- CAR_AVG(accidentsDB, dataBase,country = "USA")
-
-# plot CAR results
-x_name <- "x"
-y_name <- "y"
-days  <- c(-5:13)
-df <- data.frame(days,car_days)
-names(df) <- c(x_name,y_name)
-
-ggplot(df, aes(x = x, y = y)) + geom_line()+
-  scale_x_continuous(breaks = seq(-5,13,by=1)) + 
-  labs(x="Days relative to disaster date (t = 0)" , y = "Cumulative abnormal rate of return USA")
+plot_car(car_days, "Cumulative abnormal rate of return USA")
 
 
 set.seed(1)
@@ -92,11 +71,38 @@ reg <- lm(revenue ~ afterAccidentDays + DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+
 #reg <- lm(revenue ~ afterAccidentDays, data = training[, ]) 
 
 summary(reg)
-# 4.3 test reg on training Vs. validation
+# 4.3 test reg on validation
 library(forecast)
-pred <- predict(reg, newdata = training)
-accuracy(pred, training$revenue)
 
 pred_validation <- predict(reg, newdata = validation)
-accuracy(pred, validation$revenue)
+accuracy(pred_validation, validation$revenue)
+
+# do the same for the NYSE
+regNYSE <- lm(NYSE_revenue ~ afterAccidentDays + DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+TAX+after_holiday, data = training[, ]) 
+#reg <- lm(revenue ~ afterAccidentDays, data = training[, ]) 
+
+summary(regNYSE)
+# 4.3 test reg on validation
+
+pred_validation_NYSE <- predict(regNYSE, newdata = validation)
+accuracy(pred_validation_NYSE, validation$NYSE_revenue)
+
+# check CAR using a reg model as predictor
+# build reg object
+reg_for_car <- lm(revenue ~ DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+TAX+after_holiday, data = training[, ]) 
+summary(reg_for_car)
+
+
+#CAR - Israel
+car_days <- CAR_REG(reg_for_car, accidentsDB, dataBase)
+plot_car(car_days, "Cumulative abnormal rate of return Israel(reg)")
+
+
+reg_for_car <- lm(NYSE_revenue ~ DOW + R.t.1+ R.t.2+ R.t.3+ R.t.4+ R.t.5+TAX+after_holiday, data = training[, ]) 
+summary(reg_for_car)
+
+
+#CAR - USA
+car_days <- CAR_REG(reg_for_car, accidentsDB, dataBase)
+plot_car(car_days, "Cumulative abnormal rate of return NYSE(reg)")
 

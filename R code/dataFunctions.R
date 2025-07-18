@@ -1,4 +1,5 @@
 library(dplyr)
+library(forecast)
 
 add_days_to_date <- function(date_string, days_to_add){
   date <- as.Date(date_string, format="%d/%m/%Y")
@@ -62,12 +63,27 @@ get_revenue_at_date <- function(dataBase, date, country = "Israel"){ # date - "%
   return (-999)
 }
 
+
+get_revenue_at_date_reg <- function(regModel, dataBase, date){ # date - "%d/%m/%Y"
+  date_parts <- strsplit(date, "/")[[1]]
+  year <- as.integer(date_parts[3])
+  month <- as.integer(date_parts[2])
+  day <- as.integer(date_parts[1])
+  new_date <- paste(year, month, day, sep = "-")
+  if(new_date %in% dataBase$Date){ # compare to string format "1993-09-23"
+    index <- which(dataBase$Date == new_date)
+
+    return(predict(regModel, newdata = dataBase[index,]) )# for for prediction!
+  }
+  return (-999)
+}
+
 CAR_AVG <- function(accidentDB, STOCKdb,country = "Israel"){
-  
+
   #CAR - by avg.
   car_days <- c(-5:13)*0
   car_days_count <- c(-5:13)*0
-  
+
   for (date in accidentDB$Israel.Date) {
     current_car <- 0
     for (i in c(-5:13)) {
@@ -77,7 +93,7 @@ CAR_AVG <- function(accidentDB, STOCKdb,country = "Israel"){
       }else{
         daily_revenue <- get_revenue_at_date(STOCKdb,current_day,"USA")
       }
-      
+
       if(daily_revenue==-999){
         daily_abnormal_revenue <- 0 # days without revenue don't effect the CAR!
         # should cover also dates that don't exist in the TA125 DB!
@@ -87,14 +103,63 @@ CAR_AVG <- function(accidentDB, STOCKdb,country = "Israel"){
         car_days[i+6] <- car_days[i+6] + current_car
         car_days_count[i+6] <- car_days_count[i+6] + 1
       }
-      
+
     }
   }
   for (i in c(-5:13)) { # this step is to get the average CAR between the events.
-    # note that each date relative to the accident appears in different count due to 
+    # note that each date relative to the accident appears in different count due to
     # non market days and holidays!
     car_days[i+6] <- car_days[i+6]/car_days_count[i+6]
   }
-  
+
   car_days
+}
+
+CAR_REG <- function(regModel, accidentDB, STOCKdb){
+
+  #CAR - by reg
+  car_days <- c(-5:13)*0
+  car_days_count <- c(-5:13)*0
+
+  for (date in accidentDB$Israel.Date) {
+    current_car <- 0
+    for (i in c(-5:13)) {
+      current_day <- add_days_to_date(date,i)
+
+      daily_revenue <- get_revenue_at_date_reg(regModel,STOCKdb,current_day)
+
+
+      if(daily_revenue==-999){
+        daily_abnormal_revenue <- 0 # days without revenue don't effect the CAR!
+        # should cover also dates that don't exist in the TA125 DB!
+      }else{
+        daily_abnormal_revenue <- daily_revenue - simple_avg
+        current_car <- current_car + daily_abnormal_revenue
+        car_days[i+6] <- car_days[i+6] + current_car
+        car_days_count[i+6] <- car_days_count[i+6] + 1
+      }
+
+    }
+  }
+  for (i in c(-5:13)) { # this step is to get the average CAR between the events.
+    # note that each date relative to the accident appears in different count due to
+    # non market days and holidays!
+    car_days[i+6] <- car_days[i+6]/car_days_count[i+6]
+  }
+
+  car_days
+}
+
+plot_car <- function(car_days, y_label){
+  # plot CAR results
+  x_name <- "x"
+  y_name <- "y"
+  days  <- c(-5:13)
+  df <- data.frame(days,car_days)
+  names(df) <- c(x_name,y_name)
+  
+  ggplot(df, aes(x = x, y = y)) + geom_line()+
+    scale_x_continuous(breaks = seq(-5,13,by=1)) + 
+    labs(x="Days relative to disaster date (t = 0)" , y = y_label)
+  
 }
