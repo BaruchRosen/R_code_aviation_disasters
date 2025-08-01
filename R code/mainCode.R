@@ -94,7 +94,7 @@ summary(reg_for_car)
 
 
 #CAR - Israel
-car_days <- CAR_REG(reg_for_car, accidentsDB, dataBase)
+car_days <- CAR_REG(reg_for_car, accidentsDB, dataBase, country="Israel")
 plot_car(car_days, "Cumulative abnormal rate of return Israel(reg)")
 
 
@@ -103,6 +103,6 @@ summary(reg_for_car)
 
 
 #CAR - USA
-car_days <- CAR_REG(reg_for_car, accidentsDB, dataBase)
+car_days <- CAR_REG(reg_for_car, accidentsDB, dataBase, country="USA")
 plot_car(car_days, "Cumulative abnormal rate of return NYSE(reg)")
 
